@@ -1,19 +1,50 @@
-// const fs = require('fs/promises')
+import { randomUUID } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 
-const listContacts = async () => {}
+const contactsPath = path.join(".", "models", "contacts.json");
 
-const getContactById = async (contactId) => {}
+export function listContacts() {
+  return JSON.parse(fs.readFileSync(contactsPath, { encoding: "utf-8" }));
+}
 
-const removeContact = async (contactId) => {}
+export function getContactById(contactId) {
+  const contacts = listContacts();
+  return contacts.find((contact) => contact.id === contactId);
+}
 
-const addContact = async (body) => {}
+export function removeContact(contactId) {
+  const contacts = listContacts();
+  const index = contacts.findIndex((contact) => contact.id === contactId);
+  contacts.splice(index, 1);
+  fs.writeFileSync(contactsPath, JSON.stringify(contacts, null, 2));
+}
 
-const updateContact = async (contactId, body) => {}
+export function addContact(name, email, phone) {
+  const contacts = listContacts();
 
-module.exports = {
-  listContacts,
-  getContactById,
-  removeContact,
-  addContact,
-  updateContact,
+  const newContact = { id: randomUUID(), name, email, phone };
+  contacts.push(newContact);
+  fs.writeFileSync(contactsPath, JSON.stringify(contacts, null, 2));
+  return {
+    id: newContact.id,
+    name: newContact.name,
+    email: newContact.email,
+    phone: newContact.phone,
+  };
+}
+export function updateContact(id, { name, email, phone }) {
+  const contacts = listContacts();
+  const updatedContacts = contacts.map((contact) =>
+    contact.id === id
+      ? {
+          ...contact,
+          name: name ?? contact.name,
+          email: email ?? contact.email,
+          phone: phone ?? contact.phone,
+        }
+      : contact
+  );
+
+  fs.writeFileSync(contactsPath, JSON.stringify(updatedContacts, null, 2));
 }
