@@ -40,10 +40,10 @@ export function removeContact(contactId) {
   fs.writeFileSync(contactsPath, JSON.stringify(contacts, null, 2));
 }
 
-export function addContact(name, email, phone) {
+export function addContact(name, email, phone, favorite = false) {
   const contacts = listContacts();
 
-  const newContact = { id: randomUUID(), name, email, phone };
+  const newContact = { id: randomUUID(), name, email, phone, favorite };
   contacts.push(newContact);
   fs.writeFileSync(contactsPath, JSON.stringify(contacts, null, 2));
   return {
@@ -51,9 +51,10 @@ export function addContact(name, email, phone) {
     name: newContact.name,
     email: newContact.email,
     phone: newContact.phone,
+    favorite: newContact.favorite,
   };
 }
-export function updateContact(id, { name, email, phone }) {
+export function updateContact(id, { name, email, phone, favorite }) {
   const contacts = listContacts();
   const updatedContacts = contacts.map((contact) =>
     contact.id === id
@@ -62,6 +63,21 @@ export function updateContact(id, { name, email, phone }) {
           name: name ?? contact.name,
           email: email ?? contact.email,
           phone: phone ?? contact.phone,
+          favorite: favorite ?? contact.favorite,
+        }
+      : contact
+  );
+
+  fs.writeFileSync(contactsPath, JSON.stringify(updatedContacts, null, 2));
+}
+
+export function updateStatusContact(id, favorite) {
+  const contacts = listContacts();
+  const updatedContacts = contacts.map((contact) =>
+    contact.id === id
+      ? {
+          ...contact,
+          favorite: !favorite,
         }
       : contact
   );

@@ -6,6 +6,7 @@ import {
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact,
 } from "../../models/contacts.js";
 
 export const router = Router();
@@ -32,7 +33,7 @@ router.post("/contacts", (req, res, next) => {
   if (!body.name || !body.email || !body.phone) {
     return res.status(400).json({ message: "Missing required fields" });
   }
-  const contact = addContact(body.name, body.email, body.phone);
+  const contact = addContact(body.name, body.email, body.phone, body.favorite);
   return res.status(201).json(contact);
 });
 
@@ -61,5 +62,22 @@ router.put("/contacts/:contactId", async (req, res, next) => {
       .json({ message: `Contact with id ${id} not found!` });
   }
   updateContact(id, body);
+  return res.status(200).json({ message: `updated contact with id ${id}` });
+});
+
+router.patch("/contacts/:contactId/favorite", async (req, res, next) => {
+  const { favorite } = req.body;
+  const id = req.params.contactId;
+  const existingIds = idsList();
+  if (!favorite) {
+    return res.status(400).json({ message: "Missing field favorite" });
+  }
+
+  if (!existingIds.includes(id)) {
+    return res
+      .status(404)
+      .json({ message: `Contact with id ${id} not found!` });
+  }
+  updateStatusContact(id, favorite);
   return res.status(200).json({ message: `updated contact with id ${id}` });
 });
