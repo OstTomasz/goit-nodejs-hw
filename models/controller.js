@@ -36,12 +36,7 @@ export const createContact = async (req, res) => {
   if (!body.name || !body.email || !body.phone) {
     return res.status(400).json({ message: "Missing required fields" });
   }
-  const contact = await ContactsService.create({
-    name: body.name,
-    email: body.email,
-    phone: body.phone,
-    favourite: body.favorite,
-  });
+  const contact = await ContactsService.create(body);
   return res.status(201).json(contact);
 };
 
