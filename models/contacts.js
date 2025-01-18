@@ -1,28 +1,8 @@
-import mongoose from "mongoose";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
 const contactsPath = path.join(".", "models", "contacts.json");
-
-export const { Schema } = mongoose;
-
-const contactSchema = new Schema({
-  name: {
-    type: String,
-    required: [true, "Set name for contact"],
-  },
-  email: {
-    type: String,
-  },
-  phone: {
-    type: String,
-  },
-  favorite: {
-    type: Boolean,
-    default: false,
-  },
-});
 
 export function listContacts() {
   return JSON.parse(fs.readFileSync(contactsPath, { encoding: "utf-8" }));
