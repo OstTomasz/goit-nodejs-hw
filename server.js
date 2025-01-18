@@ -3,8 +3,11 @@ import mongoose from "mongoose";
 
 const PORT = process.env.PORT || 3000;
 const uriDb = process.env.MONGO_URI;
+const connectionpOptions = {
+  dbName: `db-contacts`,
+};
 
-const connection = mongoose.connect(uriDb);
+const connection = mongoose.connect(uriDb, connectionpOptions);
 
 app.listen(PORT, async () => {
   console.log("Connecting to database..");
