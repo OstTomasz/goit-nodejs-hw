@@ -1,12 +1,3 @@
-// import {
-//   listContacts,
-//   getContactById,
-//   removeContact,
-//   addContact,
-//   updateContact,
-//   updateStatusContact,
-// } from "./contacts.js";
-
 import * as ContactsService from "./service.js";
 
 const idsList = async () => {
