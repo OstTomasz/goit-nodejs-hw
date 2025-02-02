@@ -4,17 +4,14 @@ import * as ContactController from "../../models/contacts/controller.js";
 
 export const contactRouter = Router();
 
-contactRouter.get("/contacts", ContactController.getAll);
+contactRouter.get("/", ContactController.getAll);
 
-contactRouter.get("/contacts/:contactId", ContactController.getById);
+contactRouter.get("/:contactId", ContactController.getById);
 
-contactRouter.post("/contacts", ContactController.createContact);
+contactRouter.post("/", ContactController.createContact);
 
-contactRouter.delete("/contacts/:contactId", ContactController.deleteContact);
+contactRouter.delete("/:contactId", ContactController.deleteContact);
 
-contactRouter.put("/contacts/:contactId", ContactController.updateContactById);
+contactRouter.put("/:contactId", ContactController.updateContactById);
 
-contactRouter.patch(
-  "/contacts/:contactId/favorite",
-  ContactController.updateStatus
-);
+contactRouter.patch("/:contactId/favorite", ContactController.updateStatus);

@@ -4,14 +4,16 @@ import cors from "cors";
 
 import { contactRouter } from "./routes/api/contacts.js";
 import { userRouter } from "./routes/api/users.js";
+import { auth } from "./middlewares/auth.js";
 
 export const app = express();
 
 app.use(logger("dev"));
 app.use(cors());
 app.use(express.json());
-app.use("/api", contactRouter);
-app.use("/api", userRouter);
+
+app.use("/api/contacts", auth(), contactRouter);
+app.use("/api/users", userRouter);
 app.use((req, res) => {
   res.status(404).json({ message: "Not found" });
 });
