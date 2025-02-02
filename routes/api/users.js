@@ -1,6 +1,6 @@
 import { Router } from "express";
 import bcrypt from "bcrypt"; /* Checkout Argon2 */
-import { auth } from "../../middlewares/auth.js";
+import { auth } from "../../middleware/auth.js";
 import { User } from "../../models/users/repository.js";
 import { JWT } from "../../lib/jwt.js";
 
@@ -79,9 +79,9 @@ usersRouter.post("/users/login", async (req, res) => {
 // });
 
 // Logout.
-usersRouter.delete("/me", auth(), async (req, res) => {
-  const user = await User.findById(req?.userId);
-  console.log(`User logged out: ${user.email}`);
+// usersRouter.delete("/me", auth(), async (req, res) => {
+//   const user = await User.findById(req?.userId);
+//   console.log(`User logged out: ${user.email}`);
 
-  return res.sendStatus(204);
-});
+//   return res.sendStatus(204);
+// });

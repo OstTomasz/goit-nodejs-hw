@@ -1,18 +1,30 @@
-import { authenticate } from "passport";
+import passport from "passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { User } from "../models/users/repository.js";
 
-const secret = process.env.SECRET;
+const SECRET = process.env.JWT_SECRET;
+
+const strategyOptions = {
+  secretOrKey: SECRET,
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+};
+
+passport.use(
+  new Strategy(strategyOptions, (payload, done) => {
+    User.findById(payload?.data?.id)
+      .then((user) =>
+        !user ? done(new Error("User not existing")) : done(null, user)
+      )
+      .catch(done);
+  })
+);
 
 export const auth = (req, res, next) => {
-  authenticate("jwt", { session: false }, (err, user) => {
-    if (!user || err) {
-      return res.status(401).json({
-        status: "error",
-        code: 401,
-        message: "Unauthorized",
-        data: "Unauthorized",
-      });
+  passport.authenticate("jwt", { session: false }, (error, user) => {
+    if (!user || error) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
-    req.user = user;
+    req.userId = user._id;
     next();
   })(req, res, next);
 };

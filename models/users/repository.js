@@ -19,10 +19,6 @@ const usersSchema = new Schema({
     type: String,
     default: null,
   },
-  owner: {
-    type: Schema.Types.ObjectId,
-    ref: "user",
-  },
 });
 
 export const User = model("User", usersSchema);
