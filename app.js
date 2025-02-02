@@ -13,8 +13,8 @@ app.use(logger("dev"));
 app.use(cors());
 app.use(express.json());
 app.use("/api/users", userRouter);
-app.use("/api/jwts", auth(), jwtsRouter);
-app.use("/api/contacts", auth(), contactRouter);
+app.use("/api/jwts", auth, jwtsRouter);
+app.use("/api/contacts", auth, contactRouter);
 app.use((req, res) => {
   res.status(404).json({ message: "Not found" });
 });
