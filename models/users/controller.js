@@ -16,6 +16,7 @@ const validatePassword = async (pwd, hash) => bcrypt.compare(pwd, hash);
 const toUserDto = (userEntity) => ({
   email: userEntity.email,
   subscription: userEntity.subscription,
+  token: userEntity.token, // we don't need to expose the token in the response
 });
 
 //register
@@ -51,8 +52,28 @@ export const login = async (req, res) => {
   }
 
   const token = await JWT.sign({ id: user._id });
+  user.token = token;
   const sanitizedUser = toUserDto(user);
+
   console.log(`User logged in: ${user.email}`);
 
+  await user.save();
+  console.log(user);
   return res.json({ token, sanitizedUser });
+};
+
+//logout
+
+export const logout = async (req, res) => {
+  const { id } = req.user;
+
+  console.log(req);
+  if (!id) {
+    return res.status(401).json({ error: "Not authorized" });
+  }
+  await User.findByIdAndUpdate(id, { token: null });
+
+  console.log(`User logged out: ${req.user.email}`);
+
+  return res.status(204).json({ message: "User logged out successfully" });
 };

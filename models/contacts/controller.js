@@ -5,7 +5,7 @@ const idsList = async () => {
   return contactList.map((contact) => contact.id);
 };
 export const getAll = async (req, res) => {
-  const contacts = await ContactsService.getAll();
+  const contacts = await ContactsService.getAll({ owner: req?.userId });
   return res.status(200).json(contacts);
 };
 
