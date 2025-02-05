@@ -13,21 +13,30 @@ const params = {
 // JWT Strategy
 passport.use(
   new Strategy(params, function (payload, done) {
-    console.log(payload.data.id);
-    User.find({ id: payload.data.id })
-      .then(([user]) => {
+    console.log("Payload:", payload);
+    const userId = payload.data?.id;
+    console.log("Extracted userId:", userId);
+    if (!userId) {
+      return done(null, false);
+    }
+    User.findOne({ _id: userId })
+      .then((user) => {
         if (!user) {
-          return done(new Error("User not found"));
+          console.error("User not found for ID:", userId);
+          return done(null, false);
         }
+        console.log("Found user:", user);
         return done(null, user);
       })
-      .catch((err) => done(err));
+      .catch((err) => {
+        console.error("Error during user lookup:", err);
+        return done(err);
+      });
   })
 );
 
 export const auth = (req, res, next) => {
   passport.authenticate("jwt", { session: false }, (err, user) => {
-    console.log("auth user", user);
     if (!user || err) {
       return res.status(401).json({
         status: "error",

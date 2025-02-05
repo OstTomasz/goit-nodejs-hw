@@ -68,7 +68,6 @@ export const logout = async (req, res) => {
     return res.status(401).json({ error: "Not authorized" });
   }
   await User.findByIdAndUpdate(id, { token: null });
-
   console.log(`User logged out: ${req.user.email}`);
 
   return res.status(204).json({ message: "User logged out successfully" });
