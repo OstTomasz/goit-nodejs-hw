@@ -13,7 +13,8 @@ const params = {
 // JWT Strategy
 passport.use(
   new Strategy(params, function (payload, done) {
-    User.find({ id: payload.id })
+    console.log(payload.data.id);
+    User.find({ id: payload.data.id })
       .then(([user]) => {
         if (!user) {
           return done(new Error("User not found"));
@@ -26,6 +27,7 @@ passport.use(
 
 export const auth = (req, res, next) => {
   passport.authenticate("jwt", { session: false }, (err, user) => {
+    console.log("auth user", user);
     if (!user || err) {
       return res.status(401).json({
         status: "error",

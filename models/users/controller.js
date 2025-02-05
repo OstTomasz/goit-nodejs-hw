@@ -57,8 +57,6 @@ export const login = async (req, res) => {
 
   console.log(`User logged in: ${user.email}`);
 
-  await user.save();
-  console.log(user);
   return res.json({ token, sanitizedUser });
 };
 
@@ -80,13 +78,11 @@ export const logout = async (req, res) => {
 
 export const getCurrent = async (req, res) => {
   const user = req.user;
+
   if (!user) {
     return res.status(401).json({ error: "Not authorized" });
   }
-
   const sanitizedUser = toUserDto(user);
-
   console.log(`User info requested: ${user.email}`);
-
   return res.json(sanitizedUser);
 };
