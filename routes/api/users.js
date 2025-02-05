@@ -9,3 +9,4 @@ export const userRouter = Router();
 userRouter.post("/signup", UsersController.createUser);
 userRouter.post("/login", UsersController.login);
 userRouter.get("/logout", auth, UsersController.logout);
+userRouter.get("/current", auth, UsersController.getCurrent);

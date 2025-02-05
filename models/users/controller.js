@@ -51,7 +51,7 @@ export const login = async (req, res) => {
     return res.status(401).json({ error: "Invalid password" });
   }
 
-  const token = await JWT.sign({ id: user._id });
+  const token = await JWT.sign({ id: user.id });
   user.token = token;
   const sanitizedUser = toUserDto(user);
 
@@ -65,9 +65,7 @@ export const login = async (req, res) => {
 //logout
 
 export const logout = async (req, res) => {
-  const { id } = req.user;
-
-  console.log(req);
+  const id = req.user.id;
   if (!id) {
     return res.status(401).json({ error: "Not authorized" });
   }
@@ -76,4 +74,19 @@ export const logout = async (req, res) => {
   console.log(`User logged out: ${req.user.email}`);
 
   return res.status(204).json({ message: "User logged out successfully" });
+};
+
+//current
+
+export const getCurrent = async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    return res.status(401).json({ error: "Not authorized" });
+  }
+
+  const sanitizedUser = toUserDto(user);
+
+  console.log(`User info requested: ${user.email}`);
+
+  return res.json(sanitizedUser);
 };
