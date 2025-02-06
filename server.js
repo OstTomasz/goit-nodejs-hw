@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 const PORT = process.env.PORT || 3000;
 const uriDb = process.env.MONGO_URI;
 const connectionpOptions = {
-  dbName: `db-contacts`,
+  dbName: `GoIT-HW4`,
 };
 
 const connection = mongoose.connect(uriDb, connectionpOptions);

@@ -1,5 +1,5 @@
 import { Contact } from "./repository.js";
-export const getAll = () => Contact.find({});
+export const getAll = () => Contact.find();
 
 export const getById = (id) => Contact.findOne({ _id: id });
 
