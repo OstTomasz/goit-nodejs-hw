@@ -54,6 +54,7 @@ export const login = async (req, res) => {
 
   const token = await JWT.sign({ id: user.id });
   user.token = token;
+  user.save();
   const sanitizedUser = toUserDto(user);
 
   console.log(`User logged in: ${user.email}`);
@@ -64,12 +65,13 @@ export const login = async (req, res) => {
 //logout
 
 export const logout = async (req, res) => {
-  const id = req.user.id;
-  console.log(id);
-  if (!id) {
+  const user = req.user;
+  console.log(user);
+  if (!user.id) {
     return res.status(401).json({ error: "Not authorized" });
   }
-  await User.findByIdAndUpdate(id, { token: null });
+  await User.findByIdAndUpdate(user.id, { token: null });
+  user.save();
   console.log(`User logged out: ${req.user.email}`);
 
   return res.status(204).json({ message: "User logged out successfully" });
