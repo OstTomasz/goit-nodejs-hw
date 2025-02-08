@@ -7,10 +7,22 @@ import { jwtsRouter } from "./routes/api/jwts.js";
 import { contactRouter } from "./routes/api/contacts.js";
 import { auth } from "./middlewares/auth.js";
 
+initDirectory;
+import {
+  PUBLIC_DIRECTORY,
+  AVATARS_DIRECTORY,
+  UPLOAD_DIRECTORY,
+  initDirectory,
+} from "./config.js";
+
 export const app = express();
 
 app.use(logger("dev"));
 app.use(cors());
+
+app.use(express.static(PUBLIC_DIRECTORY));
+app.use("/avatars", express.static(AVATARS_DIRECTORY));
+
 app.use(express.json());
 app.use("/api/users", userRouter);
 app.use("/api/jwts", auth, jwtsRouter);
