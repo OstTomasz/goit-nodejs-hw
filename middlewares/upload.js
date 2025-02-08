@@ -11,7 +11,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const fileName = file.originalname;
 
-    console.log(`UploadUploading "${fileName}"`);
+    console.log(`Uploading "${fileName}"`);
 
     cb(null, fileName);
   },

@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import fs from "node:fs/promises";
 import path from "node:path";
 import gravatar from "gravatar";
+import Jimp from "jimp";
 import { JWT } from "../../lib/jwt.js";
 
 import * as UsersService from "./service.js";
@@ -110,17 +111,17 @@ export const updateAvatar = async (req, res) => {
   if (!req.file?.originalname) {
     return res.status(400).json({ message: "Invalid file" });
   }
-  console.log(req.file);
   const originalName = req.file.originalname;
-
   const targetName = `${user.email}_${originalName}`;
 
   const targetFileName = path.join(AVATARS_DIRECTORY, targetName);
-
   console.log(targetFileName);
   try {
     await sleep(3000);
     await fs.rename(req.file.path, targetFileName);
+    const img = await Jimp.read(targetFileName);
+    await img.resize(100, 100);
+    await img.write(targetFileName);
     user.avatarURL = targetFileName;
     await user.save();
     return res.status(302).json({ avatarURL: targetFileName });
