@@ -13,9 +13,8 @@ const params = {
 // JWT Strategy
 passport.use(
   new Strategy(params, function (payload, done) {
-    console.log("Payload:", payload);
     const userId = payload.data?.id;
-    console.log("Extracted userId:", userId);
+
     if (!userId) {
       return done(null, false);
     }
@@ -25,7 +24,6 @@ passport.use(
           console.error("User not found for ID:", userId);
           return done(null, false);
         }
-        console.log("Found user:", user);
         return done(null, user);
       })
       .catch((err) => {

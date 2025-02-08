@@ -96,35 +96,31 @@ export const getCurrent = async (req, res) => {
 //update Avatar
 export const updateAvatar = async (req, res) => {
   const user = req.user;
-  console.log(user);
 
   if (!user) {
     return res.status(401).json({ message: "Not authorized" });
   }
-  const avatar = user.avatarURL;
-  const newAvatar = null;
-
-  console.log("req file", req.file);
 
   if (!req.file?.originalname) {
     return res.status(400).json({ message: "Invalid file" });
   }
-
+  console.log(req.file);
   const originalName = req.file.originalname;
 
-  console.log(`Uploading ${originalName} ...`);
-
-  const targetName = `${user.email}|${originalName}`;
+  const targetName = `${user.email}_${originalName}`;
 
   const targetFileName = path.join(AVATARS_DIRECTORY, targetName);
 
+  console.log(targetFileName);
   try {
-    await sleep(4000);
+    await sleep(3000);
     await fs.rename(req.file.path, targetFileName);
+    user.avatarURL = targetFileName;
+    await user.save();
+    return res.status(302).json({ avatarURL: targetFileName });
   } catch (error) {
+    console.error("Error moving file:", error);
     await fs.unlink(req.file.path);
     return res.sendStatus(500);
   }
-
-  return res.status(302);
 };

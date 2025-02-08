@@ -1,9 +1,9 @@
 import multer from "multer";
-import { nanoid } from "nanoid";
+
 import {
   UPLOAD_DIRECTORY,
   MAX_UPLOAD_SIZE,
-  ALLOWED_FILE_TYPES,
+  // ALLOWED_FILE_TYPES,
 } from "../config.js";
 
 const storage = multer.diskStorage({
@@ -11,7 +11,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const fileName = file.originalname;
 
-    console.log(`Uploading "${fileName}"`);
+    console.log(`UploadUploading "${fileName}"`);
 
     cb(null, fileName);
   },
