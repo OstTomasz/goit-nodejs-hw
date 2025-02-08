@@ -2,6 +2,7 @@ import { User } from "./repository.js";
 import bcrypt from "bcrypt";
 import fs from "node:fs/promises";
 import path from "node:path";
+import gravatar from "gravatar";
 import { JWT } from "../../lib/jwt.js";
 
 import * as UsersService from "./service.js";
@@ -33,7 +34,12 @@ export const createUser = async (req, res) => {
     return res.status(400).json({ message: "Missing required fields" });
   }
   const hashedPassword = await hashPassword(password);
-  const user = await UsersService.register({ email, password: hashedPassword });
+  const avatarURL = gravatar.url(email, { s: "100", r: "x", d: "retro" }, true);
+  const user = await UsersService.register({
+    email,
+    password: hashedPassword,
+    avatarURL: avatarURL,
+  });
   const sanitizedUser = toUserDto(user);
   return res.status(201).json({ sanitizedUser });
 };
