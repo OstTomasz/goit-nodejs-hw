@@ -1,6 +1,6 @@
-import gravatar from "gravatar";
-import bcrypt from "bcrypt";
 import { User } from "./repository.js";
+import bcrypt from "bcrypt";
+import fs from "node:fs/promises";
 import { JWT } from "../../lib/jwt.js";
 
 import * as UsersService from "./service.js";
@@ -30,17 +30,8 @@ export const createUser = async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ message: "Missing required fields" });
   }
-  const gravatarURL = gravatar.url(
-    email,
-    { s: "100", r: "x", d: "retro" },
-    true
-  );
   const hashedPassword = await hashPassword(password);
-  const user = await UsersService.register({
-    email,
-    password: hashedPassword,
-    avatarURL: gravatarURL,
-  });
+  const user = await UsersService.register({ email, password: hashedPassword });
   const sanitizedUser = toUserDto(user);
   return res.status(201).json({ sanitizedUser });
 };
@@ -64,7 +55,7 @@ export const login = async (req, res) => {
 
   const token = await JWT.sign({ id: user.id });
   user.token = token;
-  User.save();
+  user.save();
   const sanitizedUser = toUserDto(user);
 
   console.log(`User logged in: ${user.email}`);
@@ -81,7 +72,7 @@ export const logout = async (req, res) => {
     return res.status(401).json({ error: "Not authorized" });
   }
   await User.findByIdAndUpdate(user.id, { token: null });
-  User.save();
+  user.save();
   console.log(`User logged out: ${req.user.email}`);
 
   return res.status(204).json({ message: "User logged out successfully" });
@@ -98,4 +89,38 @@ export const getCurrent = async (req, res) => {
   const sanitizedUser = toUserDto(user);
   console.log(`User info requested: ${user.email}`);
   return res.json(sanitizedUser);
+};
+//update Avatar
+export const updateAvatar = async (req, res) => {
+  const user = req.user;
+  console.log(user);
+
+  if (!user) {
+    return res.status(401).json({ message: "Not authorized" });
+  }
+  const avatar = user.avatarURL;
+  const newAvatar = null;
+
+  console.log(req.file);
+
+  if (!req.file?.originalname) {
+    return res.status(400).json({ message: "Invalid file" });
+  }
+
+  const originalName = req.file.originalname;
+
+  console.log(`Uploading ${originalName} ...`);
+
+  const targetName = `${user.email}|${originalName}`;
+
+  const targetFileName = path.join(IMAGES_DIRECTORY, targetName);
+
+  try {
+    await fs.rename(req.file.path, targetFileName);
+  } catch (error) {
+    await fs.unlink(req.file.path);
+    return res.sendStatus(500);
+  }
+
+  return res.status(302);
 };
