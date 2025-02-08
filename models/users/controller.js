@@ -1,5 +1,6 @@
-import { User } from "./repository.js";
+import gravatar from "gravatar";
 import bcrypt from "bcrypt";
+import { User } from "./repository.js";
 import { JWT } from "../../lib/jwt.js";
 
 import * as UsersService from "./service.js";
@@ -29,8 +30,17 @@ export const createUser = async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ message: "Missing required fields" });
   }
+  const gravatarURL = gravatar.url(
+    email,
+    { s: "100", r: "x", d: "retro" },
+    true
+  );
   const hashedPassword = await hashPassword(password);
-  const user = await UsersService.register({ email, password: hashedPassword });
+  const user = await UsersService.register({
+    email,
+    password: hashedPassword,
+    avatarURL: gravatarURL,
+  });
   const sanitizedUser = toUserDto(user);
   return res.status(201).json({ sanitizedUser });
 };
