@@ -1,9 +1,11 @@
 import { User } from "./repository.js";
 import bcrypt from "bcrypt";
 import fs from "node:fs/promises";
+import path from "node:path";
 import { JWT } from "../../lib/jwt.js";
 
 import * as UsersService from "./service.js";
+import { AVATARS_DIRECTORY, sleep } from "../../config.js";
 
 const hashPassword = async (pwd) => {
   const salt = await bcrypt.genSalt(10);
@@ -90,6 +92,7 @@ export const getCurrent = async (req, res) => {
   console.log(`User info requested: ${user.email}`);
   return res.json(sanitizedUser);
 };
+
 //update Avatar
 export const updateAvatar = async (req, res) => {
   const user = req.user;
@@ -101,7 +104,7 @@ export const updateAvatar = async (req, res) => {
   const avatar = user.avatarURL;
   const newAvatar = null;
 
-  console.log(req.file);
+  console.log("req file", req.file);
 
   if (!req.file?.originalname) {
     return res.status(400).json({ message: "Invalid file" });
@@ -113,9 +116,10 @@ export const updateAvatar = async (req, res) => {
 
   const targetName = `${user.email}|${originalName}`;
 
-  const targetFileName = path.join(IMAGES_DIRECTORY, targetName);
+  const targetFileName = path.join(AVATARS_DIRECTORY, targetName);
 
   try {
+    await sleep(4000);
     await fs.rename(req.file.path, targetFileName);
   } catch (error) {
     await fs.unlink(req.file.path);

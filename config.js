@@ -32,3 +32,5 @@ export const initDirectory = async (dir) => {
   console.log(`Initializing directory '${dir}'...`);
   await fs.mkdir(dir);
 };
+
+export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
