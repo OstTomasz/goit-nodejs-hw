@@ -17,3 +17,5 @@ userRouter.patch(
   upload.single("avatar"),
   UsersController.updateAvatar
 );
+
+userRouter.get("/verify/:verificationToken", auth, UsersController.verifyUser);
