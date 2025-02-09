@@ -18,4 +18,4 @@ userRouter.patch(
   UsersController.updateAvatar
 );
 
-userRouter.get("/verify/:verificationToken", auth, UsersController.verifyUser);
+userRouter.get("/verify/:verificationToken", UsersController.verifyUser);

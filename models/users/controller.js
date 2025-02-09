@@ -56,7 +56,9 @@ export const createUser = async (req, res) => {
     verificationToken: uuidv4(),
   });
 
-  const verificationUrl = `http://${req.headers.host}/verify/${user.verificationToken}`;
+  const verificationUrl = `http://${req.headers.host}/api/users/verify/${user.verificationToken}`;
+  console.log(verificationUrl);
+
   const emailOptions = {
     from: "ttost.tomasz@gmail.com",
     to: user.email,
@@ -169,13 +171,14 @@ export const updateAvatar = async (req, res) => {
 
 export const verifyUser = async (req, res) => {
   const verificationToken = req.params.verificationToken;
+  console.log("validate ver token: ", verificationToken);
   const user = await User.findOne({ verificationToken });
 
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
 
-  user.verified = true;
+  user.verify = true;
   user.verificationToken = null;
   await user.save();
   console.log(`User verified: ${user.email}`);
