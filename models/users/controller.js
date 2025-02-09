@@ -184,3 +184,35 @@ export const verifyUser = async (req, res) => {
   console.log(`User verified: ${user.email}`);
   return res.status(200).json({ message: "User verified successfully" });
 };
+
+export const resendVerToken = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "missing required field email" });
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  if (user.verify) {
+    return res.status(400).json({ message: "Account is already verified" });
+  }
+
+  const verificationUrl = `http://${req.headers.host}/api/users/verify/${user.verificationToken}`;
+  console.log("verification url: ", verificationUrl);
+
+  const emailOptions = {
+    from: "ttost.tomasz@gmail.com",
+    to: user.email,
+    subject: "Account verification",
+    text: `Hello, you need to verify your account by clicking this link: ${verificationUrl}`,
+  };
+
+  transporter
+    .sendMail(emailOptions)
+    .then((info) => console.log(info))
+    .catch((err) => console.log("transporter err", err));
+
+  return res.status(200).json({ message: "Verification email sent" });
+};

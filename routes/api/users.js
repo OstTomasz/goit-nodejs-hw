@@ -19,3 +19,4 @@ userRouter.patch(
 );
 
 userRouter.get("/verify/:verificationToken", UsersController.verifyUser);
+userRouter.post("/verify", UsersController.resendVerToken);
