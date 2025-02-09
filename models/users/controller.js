@@ -1,8 +1,13 @@
 import { User } from "./repository.js";
 import bcrypt from "bcrypt";
+import fs from "node:fs/promises";
+import path from "node:path";
+import gravatar from "gravatar";
+import Jimp from "jimp";
 import { JWT } from "../../lib/jwt.js";
 
 import * as UsersService from "./service.js";
+import { AVATARS_DIRECTORY, sleep } from "../../config.js";
 
 const hashPassword = async (pwd) => {
   const salt = await bcrypt.genSalt(10);
@@ -30,7 +35,12 @@ export const createUser = async (req, res) => {
     return res.status(400).json({ message: "Missing required fields" });
   }
   const hashedPassword = await hashPassword(password);
-  const user = await UsersService.register({ email, password: hashedPassword });
+  const avatarURL = gravatar.url(email, { s: "100", r: "x", d: "retro" }, true);
+  const user = await UsersService.register({
+    email,
+    password: hashedPassword,
+    avatarURL: avatarURL,
+  });
   const sanitizedUser = toUserDto(user);
   return res.status(201).json({ sanitizedUser });
 };
@@ -88,4 +98,36 @@ export const getCurrent = async (req, res) => {
   const sanitizedUser = toUserDto(user);
   console.log(`User info requested: ${user.email}`);
   return res.json(sanitizedUser);
+};
+
+//update Avatar
+export const updateAvatar = async (req, res) => {
+  const user = req.user;
+
+  if (!user) {
+    return res.status(401).json({ message: "Not authorized" });
+  }
+
+  if (!req.file?.originalname) {
+    return res.status(400).json({ message: "Invalid file" });
+  }
+  const originalName = req.file.originalname;
+  const targetName = `${user.email}_${originalName}`;
+
+  const targetFileName = path.join(AVATARS_DIRECTORY, targetName);
+  console.log(targetFileName);
+  try {
+    await sleep(3000);
+    await fs.rename(req.file.path, targetFileName);
+    const img = await Jimp.read(targetFileName);
+    await img.resize(100, 100);
+    await img.write(targetFileName);
+    user.avatarURL = targetFileName;
+    await user.save();
+    return res.status(302).json({ avatarURL: targetFileName });
+  } catch (error) {
+    console.error("Error moving file:", error);
+    await fs.unlink(req.file.path);
+    return res.sendStatus(500);
+  }
 };
