@@ -20,6 +20,15 @@ const userSchema = new Schema({
     default: null,
   },
   avatarURL: String,
+
+  verify: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: {
+    type: String,
+    default: null,
+  },
 });
 
 export const User = model("User", userSchema);

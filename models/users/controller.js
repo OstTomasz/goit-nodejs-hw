@@ -1,13 +1,26 @@
-import { User } from "./repository.js";
 import bcrypt from "bcrypt";
 import fs from "node:fs/promises";
 import path from "node:path";
 import gravatar from "gravatar";
 import Jimp from "jimp";
+import nodemailer from "nodemailer";
+import { v4 as uuidv4 } from "uuid";
+import { User } from "./repository.js";
 import { JWT } from "../../lib/jwt.js";
 
 import * as UsersService from "./service.js";
 import { AVATARS_DIRECTORY, sleep } from "../../config.js";
+
+const emailConfig = {
+  host: "smtp.sendgrid.net",
+  port: 587,
+  secure: true,
+  auth: {
+    user: "apikey",
+    pass: process.env.SENDGRID_KEY,
+  },
+};
+const transporter = nodemailer.createTransport(emailConfig);
 
 const hashPassword = async (pwd) => {
   const salt = await bcrypt.genSalt(10);
@@ -40,9 +53,29 @@ export const createUser = async (req, res) => {
     email,
     password: hashedPassword,
     avatarURL: avatarURL,
+    verificationToken: uuidv4(),
   });
+
+  const verificationUrl = `http://${req.headers.host}/api/users/verify/${user.verificationToken}`;
+  console.log(verificationUrl);
+
+  const emailOptions = {
+    from: "ttost.tomasz@gmail.com",
+    to: user.email,
+    subject: "Account verification",
+    text: `Hello, you need to verify your account by clicking this link: ${verificationUrl}`,
+  };
+
+  transporter
+    .sendMail(emailOptions)
+    .then((info) => console.log(info))
+    .catch((err) => console.log("transporter err", err));
+
   const sanitizedUser = toUserDto(user);
-  return res.status(201).json({ sanitizedUser });
+  return res.status(201).json({
+    sanitizedUser,
+    message: "check your email to verify your account!",
+  });
 };
 
 //login
@@ -60,6 +93,10 @@ export const login = async (req, res) => {
 
   if (!isValidPassword) {
     return res.status(401).json({ error: "Invalid password" });
+  }
+
+  if (!user.verify) {
+    return res.status(403).json({ error: "Account is not verified" });
   }
 
   const token = await JWT.sign({ id: user.id });
@@ -130,4 +167,52 @@ export const updateAvatar = async (req, res) => {
     await fs.unlink(req.file.path);
     return res.sendStatus(500);
   }
+};
+
+export const verifyUser = async (req, res) => {
+  const verificationToken = req.params.verificationToken;
+  console.log("validate ver token: ", verificationToken);
+  const user = await User.findOne({ verificationToken });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  user.verify = true;
+  user.verificationToken = null;
+  await user.save();
+  console.log(`User verified: ${user.email}`);
+  return res.status(200).json({ message: "User verified successfully" });
+};
+
+export const resendVerToken = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "missing required field email" });
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  if (user.verify) {
+    return res.status(400).json({ message: "Account is already verified" });
+  }
+
+  const verificationUrl = `http://${req.headers.host}/api/users/verify/${user.verificationToken}`;
+  console.log("verification url: ", verificationUrl);
+
+  const emailOptions = {
+    from: "ttost.tomasz@gmail.com",
+    to: user.email,
+    subject: "Account verification",
+    text: `Hello, you need to verify your account by clicking this link: ${verificationUrl}`,
+  };
+
+  transporter
+    .sendMail(emailOptions)
+    .then((info) => console.log(info))
+    .catch((err) => console.log("transporter err", err));
+
+  return res.status(200).json({ message: "Verification email sent" });
 };
